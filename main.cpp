@@ -8,32 +8,36 @@ int main()
     std::cout << "\t1. Tic Tac Toe" << std::endl;
     std::cout << "\t2. Rock, Paper, Scissors" << std::endl;
     bool check = false;
-    do {
-        do
+    std::string yes[] = {"y", "yes", "yeah", "yep", "yup"};
+    do
+    {
+        std::cout << "Please enter the number of the game you want to play: ";
+        int game;
+        std::cin >> game;
+        switch (game)
         {
-            std::cout << "Please enter the number of the game you want to play: ";
-            int game;
-            std::cin >> game;
-            switch (game)
-            {
-            case 1:
-                ticTacToe();
-                break;
-            case 2:
-                rps();
-                break;
-            default:
-                std::cout << "Please enter a valid number" << std::endl;
-                check = true;
-                break;
-            }
-        } while (check);
-        std::cout << "Do you want to play another game? (y/n): ";
-        std::string play_again;
-        std::cin >> play_again;
-        if (play_again == "n" || play_again == "no")
-        {
+        case 1:
+            ticTacToe();
+            break;
+        case 2:
+            rps();
+            break;
+        default:
+            std::cout << "Please enter a valid number" << std::endl;
+            check = true;
             break;
         }
-    } while (true);
+    } while (check);
+    std::cout << "Do you want to play another game? (y/n): ";
+    std::string play_again;
+    std::cin >> play_again;
+    if (validReply(toLower(play_again), yes))
+    {
+        main();
+    }
+    else
+    {
+        std::cout << "Thank you for playing" << std::endl;
+        return 0;
+    }
 }
