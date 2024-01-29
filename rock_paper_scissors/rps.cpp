@@ -1,34 +1,15 @@
 #include <iostream>
 #include <string>
-#include <algorithm>
-#include <cctype>
 #include <ctime>
+#include "../common.cpp"
 
-std::string toLower(std::string str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c)
-				   { return std::tolower(c); });
-	return str;
-}
 bool win_test(std::string player1, std::string player2)
 {
 	return (((player1 == "rock" || player1 == "r") && (player2 == "scissors" || player2 == "s")) ||
 			((player1 == "scissors" || player1 == "s") && (player2 == "paper" || player2 == "p")) ||
 			((player1 == "paper" || player1 == "p") && (player2 == "rock" || player2 == "r")));
 }
-bool validReply(std::string play, std::string choices[])
-{
-	bool valid = false;
-	for (int i = 0; i < 6; i++)
-	{
-		if (play == choices[i])
-		{
-			valid = true;
-			break;
-		}
-	}
-	return valid;
-}
+
 int rps()
 {
 	std::cout << "Welcome to Rock🪨, Paper🧻, Scissors✂️\n";
