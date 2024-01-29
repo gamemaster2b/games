@@ -1,7 +1,5 @@
 #include <iostream>
 #include <ctime>
-#include <vector>
-#include <cstdlib>
 #include <string>
 
 void current_game(char list_current[3][3])
