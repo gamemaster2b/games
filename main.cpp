@@ -9,7 +9,6 @@ int main()
     std::cout << "\t1. Tic Tac Toe" << std::endl;
     std::cout << "\t2. Rock, Paper, Scissors" << std::endl;
     bool check = false;
-    std::string yes[] = {"y", "yes", "yeah", "yep", "yup"};
     do
     {
         std::cout << "Please enter the number of the game you want to play: ";
@@ -32,7 +31,7 @@ int main()
     std::cout << "Do you want to play another game? (y/n): ";
     std::string play_again;
     std::cin >> play_again;
-    if (validReply(toLower(play_again), yes))
+    if (validReply(toLower(play_again)))
     {
         main();
     }
