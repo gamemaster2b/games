@@ -25,7 +25,7 @@ bool win_test(char p, char l[3][3])
         return false;
     }
 }
-int ticTacToe1Player()
+void ticTacToe1Player()
 {
     // Here I am declaring the variables
     char A = ' ';
@@ -189,10 +189,9 @@ int ticTacToe1Player()
     }
 
     std::cout << "Thanks for playing!";
-    return 0;
 }
 
-int ticTacToe2Player()
+void ticTacToe2Player()
 {
     // Here I am declaring the variables
     char A = ' ';
@@ -344,12 +343,11 @@ int ticTacToe2Player()
     }
 
     std::cout << "Thanks for playing!";
-    return 0;
 }
-int main()
+void ticTacToe()
 {
     std::cout << "Welcome to Tic Tac Toe!\n";
-    std::cout << "The are two game modes;\n2 player(2)\nLonely(1)\n";
+    std::cout << "The are two game modes;\n\t(1) I have no friends\n\t(2) I am not alone\n";
     std::cout << "Which game mode would you like to play? (1/2):";
     char game_mode;
     std::cin >> game_mode;
