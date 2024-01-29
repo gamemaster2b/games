@@ -29,7 +29,7 @@ bool validReply(std::string play, std::string choices[])
 	}
 	return valid;
 }
-int main()
+int rps()
 {
 	std::cout << "Welcome to Rock🪨, Paper🧻, Scissors✂️\n";
 	int rounds, count;

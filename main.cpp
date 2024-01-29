@@ -1,19 +1,39 @@
 #include <iostream>
 #include "./tic_tac_toe/tic_tac_toe.cpp"
-/// #include "./rock_paper_scissors/rps.cpp" // This is not complete yet
+#include "./rock_paper_scissors/rps.cpp"
 
 int main()
 {
     std::cout << "This are the games I have made;" << std::endl;
     std::cout << "\t1. Tic Tac Toe" << std::endl;
     std::cout << "\t2. Rock, Paper, Scissors" << std::endl;
-    std::cout << "What would you like to play today: ";
-    char game;
-    std::cin >> game;
-    switch (game)
-    {
-    case '1':
-        ticTacToe();
-        break;
-    }
+    bool check = false;
+    do {
+        do
+        {
+            std::cout << "Please enter the number of the game you want to play: ";
+            int game;
+            std::cin >> game;
+            switch (game)
+            {
+            case 1:
+                ticTacToe();
+                break;
+            case 2:
+                rps();
+                break;
+            default:
+                std::cout << "Please enter a valid number" << std::endl;
+                check = true;
+                break;
+            }
+        } while (check);
+        std::cout << "Do you want to play another game? (y/n): ";
+        std::string play_again;
+        std::cin >> play_again;
+        if (play_again == "n" || play_again == "no")
+        {
+            break;
+        }
+    } while (true);
 }
