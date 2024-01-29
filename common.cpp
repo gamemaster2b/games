@@ -21,3 +21,17 @@ bool validReply(std::string play, std::string choices[])
     }
     return valid;
 }
+bool validReply(std::string play)
+{
+    bool valid = false;
+    std::string choices[] = {"y", "yes", "yeah", "yep", "yup"};
+    for (int i = 0; i < 6; i++)
+    {
+        if (toLower(play)== choices[i])
+        {
+            valid = true;
+            break;
+        }
+    }
+    return valid;
+}
