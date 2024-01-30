@@ -13,7 +13,7 @@ bool win_test(std::string player1, std::string player2)
 int rps()
 {
 	std::cout << "Welcome to Rock🪨, Paper🧻, Scissors✂️\n";
-	int rounds, count;
+	int rounds=0, count=0;
 	std::string play, choices[] = {"rock", "paper", "scissors", "r", "p", "s"}, yes[] = {"y", "yes", "yeah", "yep", "yup"};
 	do
 	{
@@ -21,7 +21,7 @@ int rps()
 		{
 			std::cout << "Please enter a positive integer for the number of rounds: ";
 			std::cin >> rounds;
-		} while (rounds <= 0);
+		} while (!rounds > 0);
 		std::cout << "\n\n";
 		std::cout << "There are three choices;\n(r) rock\n(p) paper\n(s) scissors\n\n";
 		do

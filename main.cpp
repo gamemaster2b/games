@@ -1,5 +1,4 @@
 #include <iostream>
-#include "./common.cpp"
 #include "./tic_tac_toe/tic_tac_toe.cpp"
 #include "./rock_paper_scissors/rps.cpp"
 

@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  games:
+    image: games
+    build:
+      context: .
+      dockerfile: ./Dockerfile
