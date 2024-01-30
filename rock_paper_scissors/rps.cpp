@@ -34,7 +34,7 @@ int rps()
 				std::cin >> play;
 			} while (!validReply(toLower(play), choices));
 			srand(time(NULL));
-			int random = rand() % 3;
+			int random = rand() % 6;
 			std::string computer = choices[random];
 			std::cout << "Computer chose " << computer << std::endl;
 			if (toLower(play) == computer)
@@ -53,6 +53,7 @@ int rps()
 			std::cout << "\n\n";
 		} while (rounds > 0);
 		std::cout << "Would you like to play again? (y/n): ";
+		count = 0;
 		std::cin >> play;
 	} while (validReply(toLower(play), yes));
 	return 0;
