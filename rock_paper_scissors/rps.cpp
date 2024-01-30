@@ -14,7 +14,7 @@ int rps()
 {
 	std::cout << "Welcome to Rock🪨, Paper🧻, Scissors✂️\n";
 	int rounds=0, count=0;
-	std::string play, choices[] = {"rock", "paper", "scissors", "r", "p", "s"}, yes[] = {"y", "yes", "yeah", "yep", "yup"};
+	std::string play, choices[] = {"rock", "paper", "scissors", "r", "p", "s"};
 	do
 	{
 		do
