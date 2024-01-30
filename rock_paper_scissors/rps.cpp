@@ -56,6 +56,6 @@ int rps()
 		std::cout << "Would you like to play again? (y/n): ";
 		count = 0;
 		std::cin >> play;
-	} while (validReply(toLower(play), yes));
+	} while (validReply(toLower(play)));
 	return 0;
 }
