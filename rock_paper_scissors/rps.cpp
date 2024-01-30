@@ -13,7 +13,8 @@ bool win_test(std::string player1, std::string player2)
 int rps()
 {
 	std::cout << "Welcome to Rock🪨, Paper🧻, Scissors✂️\n";
-	int rounds=0, count=0;
+	int rounds = 0, count = 0;
+	srand(time(NULL));
 	std::string play, choices[] = {"rock", "paper", "scissors", "r", "p", "s"};
 	do
 	{
@@ -33,7 +34,7 @@ int rps()
 				std::cout << "What is your choice: ";
 				std::cin >> play;
 			} while (!validReply(toLower(play), choices));
-			srand(time(NULL));
+
 			int random = rand() % 6;
 			std::string computer = choices[random];
 			std::cout << "Computer chose " << computer << std::endl;
