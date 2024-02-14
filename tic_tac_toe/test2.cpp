@@ -13,15 +13,15 @@ int main(){
     char default_value[3][3]={{'1','2','3'},{'4','5','6'},{'7','8','9'}};
     char position_value[3][3]={{A,A,A},{A,A,A},{A,A,A}};
     bool game_over=false,player_won=false,comp_won=false;
-        bool valid_play==false;
+        bool valid_play=false;
     while(game_over==false){
         do{
             std::cout<<"This is the cureent game:\n";
-        current_game(position_value);
-        std::cout<<"Make your play:";
-        std::cin>>play;
-        valid_play=false;
-        for(int i=0;i<plays_available.size();i++){
+            current_game(position_value);
+            std::cout<<"Make your play:";
+            std::cin>>play;
+            valid_play=false;
+            for(int i=0;i<plays_available.size();i++){
             if(play==plays_available[i]){
                 valid_play=true;
             }
