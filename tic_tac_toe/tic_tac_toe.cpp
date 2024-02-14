@@ -35,14 +35,12 @@ int main()
     char B = 'X';
     char C = 'O';
     char play;
-    char winner;
     int plays_available = 9;
     int computer_play;
     char computer_play_char;
 
     // Here I set the default values for the game
-    std::vector<char> positions = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    char default_value[3][3] = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}};
+    char default_value[3][3] = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}};// This is used as a reference when updating the game in lines 69 and 138
     char position_value[3][3] = {{A, A, A}, {A, A, A}, {A, A, A}};
 
     // Here I am printing the welcome message and the board positions
@@ -54,13 +52,16 @@ int main()
 
         while (round_over == false)
         {
+            // Here the start of the round
             std::cout << "This is the cureent game:\n";
             current_game(position_value);
             while (valid_play == false)
             {
+                // Here I am making the player play
                 std::cout << "Make your play:";
                 std::cin >> play;
 
+                // Here I am testing if the player play is valid and if it is I am making the play
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
@@ -81,6 +82,8 @@ int main()
                     }
                 }
             }
+
+
             valid_play = false;
             plays_available--;
             std::cout << "Plays available: " << plays_available << std::endl;
@@ -92,6 +95,7 @@ int main()
                 computer_play = 1 + (rand() % 9);
                 switch (computer_play)
                 {
+                    // Here I am converting the computer play to a char
                 case 0:
                     computer_play_char = '7';
                     break;
@@ -126,7 +130,7 @@ int main()
                     break;
                 }
                 
-                // Here I am testing if the computer play is valid
+                // Here I am testing if the computer play is valid and if it is I am making the play
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
@@ -147,45 +151,33 @@ int main()
             plays_available--;
             std::cout << "Plays available: " << plays_available << std::endl;
 
-            // Here I am testing if the game is over
+            // Here I am testing if the game is over and if it is I am declaring the winner
             if (win_test(B, position_value) == true)
             {
-                winner = 'p';
+                std::cout << "🎉You won!🎉"<<std::endl;
                 round_over = true;
             }
             else if (win_test(C, position_value) == true)
             {
-                winner = 'c';
+                std::cout << "You lost!😢"<<std::endl;
                 round_over = true;
             }
             else if (plays_available <= 0)
             {
                 round_over = true;
+                std::cout << "It's a tie!😑"<<std::endl;
             }
         }
-        if (winner == 'p')
-        {
-            std::cout << "🎉You won!🎉"<<std::endl;
-        }
-        else if (winner == 'c')
-        {
-            std::cout << "You lost!😢"<<std::endl;
-        }
-        else
-        {
-            std::cout << "It's a tie!😑"<<std::endl;
-        }
-
+        
         // Here I am asking the player if they want to play again
         std::cout << "Do you want to play again? (y/n):";
         std::string play_again;
         std::cin >> play_again;
         if (play_again == "y" || play_again == "Y" || play_again == "yes" || play_again == "Yes" || play_again == "YES" || play_again == "yEs" || play_again == "yeS" || play_again == "YEs" || play_again == "yES" || play_again == "YeS" || play_again == "yEs" || play_again == "yES" || play_again == "YeS")
         {
-            game_over = false;
+            // Here I am resetting the game
             round_over = false;
             plays_available = 9;
-            winner = NULL;
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
