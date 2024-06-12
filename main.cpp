@@ -7,11 +7,12 @@ int main()
     std::cout << "This are the games I have made;" << std::endl;
     std::cout << "\t1. Tic Tac Toe" << std::endl;
     std::cout << "\t2. Rock, Paper, Scissors" << std::endl;
-    bool check = false;
+    bool check;
     do
     {
         std::cout << "Please enter the number of the game you want to play: ";
         int game;
+        check = false;
         std::cin >> game;
         switch (game)
         {
