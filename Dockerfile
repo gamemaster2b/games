@@ -7,13 +7,13 @@ FROM gcc:latest
 
 # These commands copy your files into the specified directory in the image
 # and set that as the working location
-COPY . /usr/src/myapp
-WORKDIR /usr/src/myapp
+COPY . /usr/src/games
+WORKDIR /usr/src/games
 
 # This command compiles your app using GCC, adjust for your source code
-RUN g++ -o myapp main.cpp
+RUN g++ -o games main.cpp
 
 # This command runs your application, comment out this line to compile only
-CMD ["./myapp"]
+CMD ["./games"]
 
-LABEL Name=games Version=0.0.1
+LABEL Name=games Version=test
