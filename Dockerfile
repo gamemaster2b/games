@@ -3,7 +3,7 @@
 # See https://hub.docker.com/r/library/gcc/ for all supported GCC
 # tags from Docker Hub.
 # See https://docs.docker.com/samples/library/gcc/ for more on how to use this image
-FROM gcc:latest
+FROM rust:latest
 
 # These commands copy your files into the specified directory in the image
 # and set that as the working location
@@ -11,9 +11,9 @@ COPY . /usr/src/games
 WORKDIR /usr/src/games
 
 # This command compiles your app using GCC, adjust for your source code
-RUN g++ -o games main.cpp
+RUN cargo b
 
 # This command runs your application, comment out this line to compile only
-CMD ["./games"]
+CMD ["cargo r"]
 
 LABEL Name=games Version=test
