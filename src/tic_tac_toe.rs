@@ -1,4 +1,3 @@
-use bevy::scene::ron::de;
 use itertools::Itertools;
 use std::{
     collections::btree_map::IterMut,
@@ -46,8 +45,8 @@ impl Board {
     fn print(&self) {
         print!("y\\x ");
         for x in (0..self.size) {
-                print!(" {} ", x);
-            }
+            print!(" {} ", x);
+        }
         println!();
         for y in (0..self.size) {
             print!("  {} ", y);
@@ -79,7 +78,6 @@ pub fn tic_tac_toe() {
         Err(e) => println!("That is not a valid input: {}", e),
     }
 
-
     print!("What size board would you like to play on: ");
     io::stdout().flush();
 
@@ -104,15 +102,33 @@ pub fn tic_tac_toe() {
     let mut board_chain = Default::default();
     match io::stdin().read_line(&mut board_chain) {
         Ok(_) => {}
-        Err(e) => { println!("Chain Issuue: {:?}", e)}
+        Err(e) => {
+            println!("Chain Issuue: {:?}", e)
+        }
     }
     let board_chain: u8 = match board_chain.trim().parse() {
         Ok(chain) => chain,
-        Err(e) => { println!("Chain issue: {:?}", e); return;}
+        Err(e) => {
+            println!("Chain issue: {:?}", e);
+            return;
+        }
     };
 
-    
     let board = Board::new(board_size, board_chain);
     println!("This is the board: ");
     board.print();
+
+    println!("Enter your move in the form: (x,y) : ");
+    io::stdout().flush();
+
+    let mut play = Default::default();
+    match io::stdin().read_line(&mut play) {
+        Ok(_) => {}
+        Err(e) => {
+            println!("Play Issuue: {:?}", e)
+        }
+    }
+    let mut play: Vec<&str> = play.trim().split(&[' ', ',', '(', ')'][..]).collect();
+
+    println!("{:?}", play);
 }
