@@ -1,0 +1,16 @@
+{
+    "plugins": [
+        {
+            "type": "add",
+            "pluginName": "fleet.rust"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.toml"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.vim"
+        }
+    ]
+}
