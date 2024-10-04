@@ -5,74 +5,61 @@ use std::{
     io::{self, Write},
 };
 
-struct Tile {
-    value: char,
+#[derive(Component)]
+struct Position {
     x: u8,
     y: u8,
 }
 
-impl Tile {
-    fn update(&mut self, value: &char) {
-        self.value = *value;
+impl Position {
+    fn new(x: u8, y: u8) -> Position {
+        Position { x, y }
     }
 }
-impl Default for Tile {
-    fn default() -> Self {
-        Self {
-            value: ' ',
-            x: 0,
-            y: 0,
+
+#[derive(Component)]
+struct TileSymbol {
+    symbol: String,
+}
+
+impl TileSymbol {
+    fn new(symbol: &str) -> TileSymbol {
+        TileSymbol {
+            symbol: symbol.to_string(),
         }
     }
 }
 
+#[derive(Component)]
 struct Board {
     size: u8,
     chain: u8,
-    tiles: Vec<Tile>,
 }
+
 impl Board {
     fn new(size: u8, chain: u8) -> Board {
-        let mut tiles: Vec<Tile> = Vec::new();
-        for item in (0..size).cartesian_product(0..size) {
-            tiles.push(Tile {
-                x: item.0,
-                y: item.1,
-                ..Default::default()
-            });
-        }
-        Board { size, chain, tiles }
+        Board { size, chain }
     }
+
     fn print(&self) {
-        print!("y\\x ");
-        for x in (0..self.size) {
-            print!(" {} ", x);
-        }
-        println!();
-        for y in (0..self.size) {
-            print!("  {} ", y);
-            for x in (0..self.size) {
-                print!("|{}|", self.tiles[(y * self.size + x) as usize].value);
+        for i in 0..self.size {
+            for j in 0..self.size {
+                print!("{} ", "-");
             }
             println!();
         }
     }
-    fn update(&mut self, x: u8, y: u8, value: char) {
-        self.tiles[(y * self.size + x) as usize].update(&value);
-    }
 }
 impl Default for Board {
     fn default() -> Self {
-        let default_board = Board::new(3, 3);
         Self {
-            size: default_board.size,
-            chain: default_board.chain,
-            tiles: default_board.tiles,
+            size: 3,
+            chain: 3,
         }
     }
 }
 
-    
+
 
 
 pub fn tic_tac_toe() {
@@ -120,6 +107,14 @@ pub fn tic_tac_toe() {
             return;
         }
     };
+    
+    let world: World = Default::default();
+    
+    world.spawn(Board::new(board_size, board_chain)).insert(|tiles| {
+        for tile in (0..board_size).cartesian_product(0..board_size) {
+            tiles.spawn(Position::new(tile.0, tile.1)).with(TileSymbol::new(" "));
+        }
+    });
 
     let board = Board::new(board_size, board_chain);
     println!("This is the board: ");
