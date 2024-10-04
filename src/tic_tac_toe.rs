@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use bevy_ecs::prelude::*;
 use std::{
     collections::btree_map::IterMut,
     io::{self, Write},
@@ -56,6 +57,9 @@ impl Board {
             println!();
         }
     }
+    fn update(&mut self, x: u8, y: u8, value: char) {
+        self.tiles[(y * self.size + x) as usize].update(&value);
+    }
 }
 impl Default for Board {
     fn default() -> Self {
@@ -67,6 +71,9 @@ impl Default for Board {
         }
     }
 }
+
+    
+
 
 pub fn tic_tac_toe() {
     print!("Would you like to vs the computer(c) or a friend(f): ");
@@ -96,14 +103,14 @@ pub fn tic_tac_toe() {
         }
     };
 
-    print!("Chain length");
+    print!("Chain length: ");
     io::stdout().flush();
 
     let mut board_chain = Default::default();
     match io::stdin().read_line(&mut board_chain) {
         Ok(_) => {}
         Err(e) => {
-            println!("Chain Issuue: {:?}", e)
+            println!("Chain Issue: {:?}", e)
         }
     }
     let board_chain: u8 = match board_chain.trim().parse() {
@@ -125,7 +132,7 @@ pub fn tic_tac_toe() {
     match io::stdin().read_line(&mut play) {
         Ok(_) => {}
         Err(e) => {
-            println!("Play Issuue: {:?}", e)
+            println!("Play Fucked: {:?}", e)
         }
     }
     let mut play: Vec<&str> = play.trim().split(&[' ', ',', '(', ')'][..]).collect();
