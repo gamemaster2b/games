@@ -108,11 +108,11 @@ pub fn tic_tac_toe() {
         }
     };
     
-    let world: World = Default::default();
+    let mut world: World = Default::default();
     
-    world.spawn(Board::new(board_size, board_chain)).insert(|tiles| {
+    world.spawn(Board::new(board_size, board_chain)).insert(|tiles: &mut World| {
         for tile in (0..board_size).cartesian_product(0..board_size) {
-            tiles.spawn(Position::new(tile.0, tile.1)).with(TileSymbol::new(" "));
+            tiles.spawn(Position::new(tile.0, tile.1)).insert(TileSymbol::new(" "));
         }
     });
 
