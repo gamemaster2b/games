@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use bevy_ecs::prelude::*;
+use bevy::prelude::*;
 use std::{
     collections::btree_map::IterMut,
     io::{self, Write},
