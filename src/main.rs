@@ -1,12 +1,13 @@
 #![allow(unused)]
 
-use std::{
-    collections::btree_map::IterMut,
-    io::{self, Write},
-};
-mod tic_tac_toe;
+mod colors;
+
+use bevy::prelude::*;
+//! use std::{ collections::btree_map::IterMut, io::{self, Write}, };
+//! mod tic_tac_toe;
 
 fn main() {
+    /*
     println!("Hello, Gamer!");
 
     'main_loop: loop {
@@ -41,10 +42,12 @@ fn main() {
             };
 
             match input {
-                1 => tic_tac_toe::tic_tac_toe(),
+                1 => println!("tic_tact_toe goes here"),//tic_tac_toe::tic_tac_toe(),
                 2 => println!("Rock Paper Scissors"),
                 _ => println!("Invalid input"),
             }
         }
     }
+    */
+    App::new().add_plugins(DefailtPlugins) ;
 }
