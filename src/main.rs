@@ -3,6 +3,8 @@
 mod colors;
 
 use bevy::{prelude::*, window::WindowMode};
+use rand::thread_rng;
+use rand::Rng;
 use std::string::ToString;
 
 fn main() {
@@ -16,8 +18,8 @@ fn main() {
             }),
             ..Default::default()
         }))
-        .add_systems(Startup, (spawn_camera, spawn_players_on_table))
-        .add_systems(Update, move_puddles)
+        .add_systems(Startup, (spawn_camera, spawn_players_on_table, spawn_ball))
+        .add_systems(Update, (move_puddles, move_ball))
         .run();
 }
 
@@ -29,10 +31,22 @@ pub fn spawn_camera(mut commands: Commands) {
 struct Puddle {
     move_up: KeyCode,
     move_down: KeyCode,
+    velocity: f32,
+}
+
+impl Default for Puddle {
+    fn default() -> Self {
+        Puddle {
+            move_up: KeyCode::ArrowUp,
+            move_down: KeyCode::ArrowDown,
+            velocity: PUDDLE_VELOCITY,
+        }
+    }
 }
 
 const PUDDLE_X: f32 = 10.;
 const PUDDLE_Y: f32 = 150.;
+const PUDDLE_VELOCITY: f32 = 200.;
 
 const TABLE_X: f32 = 700.;
 const TABLE_Y: f32 = 500.;
@@ -63,6 +77,7 @@ fn spawn_players_on_table(mut commands: Commands) {
         Puddle {
             move_up: KeyCode::KeyW,
             move_down: KeyCode::KeyS,
+            ..Default::default()
         },
     ));
     commands.spawn((
@@ -83,6 +98,7 @@ fn spawn_players_on_table(mut commands: Commands) {
         Puddle {
             move_up: KeyCode::ArrowUp,
             move_down: KeyCode::ArrowDown,
+            ..Default::default()
         },
     ));
 }
@@ -93,18 +109,50 @@ fn move_puddles(
 ) {
     for (mut pos, settings) in &mut paddles {
         if input.pressed(settings.move_up) {
-            pos.translation.y += 1. * time.delta_seconds() * 100.;
+            pos.translation.y += settings.velocity * time.delta_seconds();
             pos.translation.y = pos.translation.y.clamp(
                 -TABLE_Y / 2. + (PUDDLE_Y / 2.),
                 (TABLE_Y / 2.) - (PUDDLE_Y / 2.),
             );
         }
         if input.pressed(settings.move_down) {
-            pos.translation.y += -1. * time.delta_seconds() * 100.;
+            pos.translation.y += -settings.velocity * time.delta_seconds();
             pos.translation.y = pos.translation.y.clamp(
                 -TABLE_Y / 2. + (PUDDLE_Y / 2.),
                 (TABLE_Y / 2.) - (PUDDLE_Y / 2.),
             );
         }
+    }
+}
+
+#[derive(Component)]
+struct Ball(Vec2);
+
+const BALL_SIZE: f32 = PUDDLE_Y / 3.;
+const BALL_SPEED: f32 = PUDDLE_VELOCITY * 1.0;
+
+fn spawn_ball(mut commands: Commands) {
+    let direction: f32 = (thread_rng().gen::<f32>() * 360.).to_radians();
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform::from_translation(Vec3::new(0., 0., 0.)),
+            sprite: Sprite {
+                color: colors::TILE,
+                custom_size: Some(Vec2::new(BALL_SIZE, BALL_SIZE)),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        Ball(Vec2::new(
+            BALL_SPEED * direction.sin(),
+            BALL_SPEED * direction.cos(),
+        )),
+    ));
+}
+
+fn move_ball(mut ball: Query<(&mut Transform, &Ball)>, time: Res<Time>) {
+    for (mut pos, settings) in &mut ball {
+        pos.translation.x += settings.0.x * time.delta_seconds();
+        pos.translation.y += settings.0.y * time.delta_seconds();
     }
 }
