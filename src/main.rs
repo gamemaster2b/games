@@ -2,9 +2,11 @@
 
 mod colors;
 
+use std::string::ToString;
 use bevy::prelude::*;
-//! use std::{ collections::btree_map::IterMut, io::{self, Write}, };
-//! mod tic_tac_toe;
+use bevy::window::WindowMode;
+// use std::{ collections::btree_map::IterMut, io::{self, Write}, };
+// mod tic_tac_toe;
 
 fn main() {
     /*
@@ -13,7 +15,7 @@ fn main() {
     'main_loop: loop {
         let mut input = Default::default();
         let games = ["Tic Tac Toe", "Rock Paper Scissors"];
-        println!("This are the games we have: ");
+        println!("These are the games we have: ");
         for (index, item) in games.iter().enumerate() {
             println!("\t{}. {}", index + 1, item);
         }
@@ -27,7 +29,7 @@ fn main() {
             }
         }
 
-        println!("{:?} waad", input);
+        println!("{:?} What the fuck", input);
         if input.trim() == "q" {
             break 'main_loop;
         }
@@ -49,5 +51,32 @@ fn main() {
         }
     }
     */
-    App::new().add_plugins(DefailtPlugins) ;
+    App::new()
+        .insert_resource(ClearColor(colors::CLEAR_COLOR))
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "games".to_string(),
+                mode: WindowMode::BorderlessFullscreen,
+                ..Default::default()
+            }),
+            ..Default::default()
+        }))
+        .add_systems(Startup, ( spawn_camera, main_menu ))
+        .run();
+}
+
+pub fn spawn_camera (mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+}
+
+const GAMES: [&str; 2] = ["Tic Tac Toe", "Rock Paper Scissors"];
+pub fn main_menu (mut commands: Commands) {
+    commands.spawn(SpriteBundle {
+        sprite: Sprite {
+            custom_size: Some(Vec2::new(720.0, 720.0)),
+            color: colors::BOARD,
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 }

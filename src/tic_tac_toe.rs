@@ -74,5 +74,5 @@ pub fn tic_tac_toe(mut commands: Commands) {
             ..Default::default()
         },
         ..Default::default()
-    })
+    });
 }
