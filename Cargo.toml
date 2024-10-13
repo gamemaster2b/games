@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = {version =  "*", features = ["dynamic_linking"]}
+bevy = { version = "*", features = ["bevy_debug_stepping"] }
 bevy_ecs = "*"
 getrandom = "*"
 itertools = "*"
@@ -13,8 +13,10 @@ rand = "*"
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]
 opt-level = 1
+debug = true
 
 # Enable a large amount of optimization in the dev profile for dependencies.
 [profile.dev.package."*"]
 opt-level = 3
+debug = false
 

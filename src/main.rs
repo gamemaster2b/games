@@ -1,9 +1,9 @@
-#![allow(unused)]
+// #![allow(unused)]
 
 mod colors;
 
 use bevy::{prelude::*, window::WindowMode};
-use rand::{thread_rng, Rng};
+use rand::random;
 use std::string::ToString;
 
 fn main() {
@@ -18,11 +18,11 @@ fn main() {
             ..Default::default()
         }))
         .add_systems(Startup, (spawn_camera, spawn_players_on_table, spawn_ball))
-        .add_systems(Update, (move_paddles, move_ball, ball_collision))
+        .add_systems(Update, (move_paddles, (ball_collide, move_ball).chain()))
         .run();
 }
 
-pub fn spawn_camera(mut commands: Commands) {
+fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
@@ -82,7 +82,7 @@ fn spawn_players_on_table(mut commands: Commands) {
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3::new(
-                ((TABLE_X / 2.) - (PADDLE_X * 2.)),
+                (TABLE_X / 2.) - (PADDLE_X * 2.),
                 0.0,
                 0.0,
             )),
@@ -131,12 +131,12 @@ const BALL_SIZE: f32 = PADDLE_Y * 3. / 12.;
 const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
 
 fn spawn_ball(mut commands: Commands) {
-    let mut direction: f32 = (thread_rng().gen::<f32>() * 360.);
+    let mut direction: f32 = random::<f32>() * 360.;
     'set_cone: loop {
         if direction > 45. && direction < 135. || direction > 225. && direction < 315. {
             direction += 45.;
         } else {
-            let direction = direction.to_radians();
+            direction = direction.to_radians();
             break 'set_cone;
         }
     }
@@ -158,16 +158,16 @@ fn spawn_ball(mut commands: Commands) {
 }
 
 fn move_ball(mut balls: Query<(&mut Transform, &Ball)>, time: Res<Time>) {
-    for (mut pos, settings) in &mut balls {
-        pos.translation.x += settings.0.x * time.delta_seconds();
-        pos.translation.y += settings.0.y * time.delta_seconds();
+    for (mut ball_pos, ball_settings) in &mut balls {
+        ball_pos.translation.x += ball_settings.0.x * time.delta_seconds();
+        ball_pos.translation.y += ball_settings.0.y * time.delta_seconds();
     }
 }
-fn ball_collision(
+fn ball_collide(
     mut balls: Query<(&mut Transform, &mut Ball)>,
-    paddles: Query<&Transform, Without<Ball>>,
+    paddles: Query<&Transform, (With<Paddle>, Without<Ball>)>,
 ) {
-    for (mut ball_pos, mut ball_settings) in &mut balls {
+    for (ball_pos, mut ball_settings) in &mut balls {
         for paddle_pos in &paddles {
             if ball_pos.translation.x - BALL_SIZE / 2. < paddle_pos.translation.x - PADDLE_X / 2.
                 && ball_pos.translation.x + BALL_SIZE / 2.
