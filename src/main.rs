@@ -61,11 +61,7 @@ fn spawn_players_on_table(mut commands: Commands) {
     });
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_translation(Vec3::new(
-                -((TABLE_X / 2.) - (PADDLE_X * 2.)),
-                0.0,
-                0.0,
-            )),
+            transform: Transform::from_translation(Vec3::new(-((TABLE_X / 2.) - (PADDLE_X * 2.)), 0.0, 0.0)),
             sprite: Sprite {
                 color: colors::TILE_PLACEHOLDER,
                 custom_size: Some(Vec2::new(PADDLE_X, PADDLE_Y)),
@@ -81,11 +77,7 @@ fn spawn_players_on_table(mut commands: Commands) {
     ));
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_translation(Vec3::new(
-                (TABLE_X / 2.) - (PADDLE_X * 2.),
-                0.0,
-                0.0,
-            )),
+            transform: Transform::from_translation(Vec3::new((TABLE_X / 2.) - (PADDLE_X * 2.), 0.0, 0.0)),
             sprite: Sprite {
                 color: colors::TILE_PLACEHOLDER,
                 custom_size: Some(Vec2::new(PADDLE_X, PADDLE_Y)),
@@ -109,17 +101,17 @@ fn move_paddles(
     for (mut pos, settings) in &mut paddles {
         if input.pressed(settings.move_up) {
             pos.translation.y += settings.velocity * time.delta_seconds();
-            pos.translation.y = pos.translation.y.clamp(
-                -TABLE_Y / 2. + (PADDLE_Y / 2.),
-                (TABLE_Y / 2.) - (PADDLE_Y / 2.),
-            );
+            pos.translation.y = pos
+                .translation
+                .y
+                .clamp(-TABLE_Y / 2. + (PADDLE_Y / 2.), (TABLE_Y / 2.) - (PADDLE_Y / 2.));
         }
         if input.pressed(settings.move_down) {
             pos.translation.y += -settings.velocity * time.delta_seconds();
-            pos.translation.y = pos.translation.y.clamp(
-                -TABLE_Y / 2. + (PADDLE_Y / 2.),
-                (TABLE_Y / 2.) - (PADDLE_Y / 2.),
-            );
+            pos.translation.y = pos
+                .translation
+                .y
+                .clamp(-TABLE_Y / 2. + (PADDLE_Y / 2.), (TABLE_Y / 2.) - (PADDLE_Y / 2.));
         }
     }
 }
@@ -150,10 +142,7 @@ fn spawn_ball(mut commands: Commands) {
             },
             ..Default::default()
         },
-        Ball(Vec2::new(
-            BALL_SPEED * direction.sin(),
-            BALL_SPEED * direction.cos(),
-        )),
+        Ball(Vec2::new(BALL_SPEED * direction.sin(), BALL_SPEED * direction.cos())),
     ));
 }
 
@@ -170,18 +159,14 @@ fn ball_collide(
     for (ball_pos, mut ball_settings) in &mut balls {
         for paddle_pos in &paddles {
             if ball_pos.translation.x - BALL_SIZE / 2. < paddle_pos.translation.x - PADDLE_X / 2.
-                && ball_pos.translation.x + BALL_SIZE / 2.
-                    > paddle_pos.translation.x + PADDLE_X / 2.
-                && ball_pos.translation.y - BALL_SIZE / 2.
-                    < paddle_pos.translation.y + PADDLE_Y / 2.
-                && ball_pos.translation.y + BALL_SIZE / 2.
-                    > paddle_pos.translation.y - PADDLE_Y / 2.
+                && ball_pos.translation.x + BALL_SIZE / 2. > paddle_pos.translation.x + PADDLE_X / 2.
+                && ball_pos.translation.y - BALL_SIZE / 2. < paddle_pos.translation.y + PADDLE_Y / 2.
+                && ball_pos.translation.y + BALL_SIZE / 2. > paddle_pos.translation.y - PADDLE_Y / 2.
             {
                 ball_settings.0.x *= -1.;
             }
         }
-        if ball_pos.translation.y + BALL_SIZE / 2. > TABLE_Y / 2.
-            || ball_pos.translation.y - BALL_SIZE / 2. < -TABLE_Y / 2.
+        if ball_pos.translation.y + BALL_SIZE / 2. > TABLE_Y / 2. || ball_pos.translation.y - BALL_SIZE / 2. < -TABLE_Y / 2.
         {
             ball_settings.0.y *= -1.;
         }

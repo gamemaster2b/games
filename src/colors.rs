@@ -1,4 +1,3 @@
-
 use bevy::prelude::Color;
 
 pub const BOARD: Color = Color::Oklcha(bevy::color::Oklcha {
