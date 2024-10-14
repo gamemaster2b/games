@@ -8,7 +8,7 @@ use std::string::ToString;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(colors::CLEAR_COLOR))
+        .insert_resource(ClearColor(colors::CAMERA_CLEAR_COLOR))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "ZeroToPong".to_string(),
@@ -125,7 +125,9 @@ const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
 fn spawn_ball(mut commands: Commands) {
     let mut direction: f32 = random::<f32>() * 360.;
     'set_cone: loop {
-        if direction > 45. && direction < 135. || direction > 225. && direction < 315. {
+        if direction > 30. && direction < 90. || direction > 210. && direction < 270. {
+            direction -= 45.;
+        } else if direction > 270. && direction < 330. || direction > 90. && direction < 150. {
             direction += 45.;
         } else {
             direction = direction.to_radians();

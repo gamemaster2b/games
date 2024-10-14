@@ -28,7 +28,7 @@ pub const TEXT: Color = Color::Oklcha(bevy::color::Oklcha {
     alpha: 1.0,
 });
 
-pub const CLEAR_COLOR: Color = Color::Oklcha(bevy::color::Oklcha {
+pub const CAMERA_CLEAR_COLOR: Color = Color::Oklcha(bevy::color::Oklcha {
     lightness: 0.2706,
     chroma: 0.035,
     hue: 267.69,
