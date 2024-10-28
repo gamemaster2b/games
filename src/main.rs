@@ -2,9 +2,15 @@
 
 pub mod colors;
 
-use bevy::{prelude::*, window::WindowMode};
+use bevy::{
+    prelude::*,
+    window::{WindowMode, WindowResolution},
+};
 use rand::random;
 use std::string::ToString;
+
+const WINDOW_WIDTH: f32 = 1280.;
+const WINDOW_HIGHT: f32 = 720.;
 
 fn main() {
     let mut app = App::new();
@@ -13,6 +19,7 @@ fn main() {
         primary_window: Some(Window {
             title: "ZeroToPong".to_string(),
             mode: WindowMode::Windowed,
+            resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HIGHT),
             ..Default::default()
         }),
         ..Default::default()
@@ -44,33 +51,21 @@ impl Default for Paddle {
     }
 }
 
-const PADDLE_LENGTH: f32 = 10.;
-const PADDLE_WIDTH: f32 = 150.;
+const PADDLE_WIDTH: f32 = 10.;
+const PADDLE_HIGHT: f32 = WINDOW_HIGHT / 5.;
 const PADDLE_VELOCITY: f32 = 200.;
 
-const TABLE_LENGTH: f32 = 700.;
-const TABLE_WIDTH: f32 = 500.;
-
 fn spawn_players(mut commands: Commands) {
-    commands.spawn(SpriteBundle {
-        transform: Transform::from_translation(Vec3::new(0.0, 0.0, -1.0)),
-        sprite: Sprite {
-            color: colors::cyberpunk::BOARD,
-            custom_size: Some(Vec2::new(TABLE_LENGTH, TABLE_WIDTH)),
-            ..Default::default()
-        },
-        ..Default::default()
-    });
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3::new(
-                -((TABLE_LENGTH / 2.) - (PADDLE_LENGTH * 2.)),
+                -((WINDOW_WIDTH / 2.) - (PADDLE_WIDTH * 2.)),
                 0.0,
                 0.0,
             )),
             sprite: Sprite {
                 color: colors::TILE_PLACEHOLDER,
-                custom_size: Some(Vec2::new(PADDLE_LENGTH, PADDLE_WIDTH)),
+                custom_size: Some(Vec2::new(PADDLE_WIDTH, PADDLE_HIGHT)),
                 ..Default::default()
             },
             ..Default::default()
@@ -84,13 +79,13 @@ fn spawn_players(mut commands: Commands) {
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3::new(
-                (TABLE_LENGTH / 2.) - (PADDLE_LENGTH * 2.),
+                (WINDOW_WIDTH / 2.) - (PADDLE_WIDTH * 2.),
                 0.0,
                 0.0,
             )),
             sprite: Sprite {
                 color: colors::TILE_PLACEHOLDER,
-                custom_size: Some(Vec2::new(PADDLE_LENGTH, PADDLE_WIDTH)),
+                custom_size: Some(Vec2::new(PADDLE_WIDTH, PADDLE_HIGHT)),
                 ..Default::default()
             },
 
@@ -112,15 +107,15 @@ fn move_paddles(
         if input.pressed(settings.move_up) {
             pos.translation.y += settings.velocity * time.delta_seconds();
             pos.translation.y = pos.translation.y.clamp(
-                -TABLE_WIDTH / 2. + (PADDLE_WIDTH / 2.),
-                (TABLE_WIDTH / 2.) - (PADDLE_WIDTH / 2.),
+                -WINDOW_HIGHT / 2. + (PADDLE_HIGHT / 2.),
+                (WINDOW_HIGHT / 2.) - (PADDLE_HIGHT / 2.),
             );
         }
         if input.pressed(settings.move_down) {
             pos.translation.y += -settings.velocity * time.delta_seconds();
             pos.translation.y = pos.translation.y.clamp(
-                -TABLE_WIDTH / 2. + (PADDLE_WIDTH / 2.),
-                (TABLE_WIDTH / 2.) - (PADDLE_WIDTH / 2.),
+                -WINDOW_HIGHT / 2. + (PADDLE_HIGHT / 2.),
+                (WINDOW_HIGHT / 2.) - (PADDLE_HIGHT / 2.),
             );
         }
     }
@@ -129,7 +124,7 @@ fn move_paddles(
 #[derive(Component)]
 struct Ball(Vec2);
 
-const BALL_SIZE: f32 = PADDLE_WIDTH * 3. / 12.;
+const BALL_SIZE: f32 = PADDLE_HIGHT * 3. / 12.;
 const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
 const BALL_DIRECTION_CONE: f32 = 60.;
 
@@ -174,30 +169,31 @@ fn move_ball(mut balls: Query<(&mut Transform, &Ball)>, time: Res<Time>) {
 }
 fn ball_collide(
     mut balls: Query<(&mut Transform, &mut Ball)>,
-    paddles: Query<&Transform, (With<Paddle>, Without<Ball>)>
+    paddles: Query<&Transform, (With<Paddle>, Without<Ball>)>,
 ) {
     for (ball_pos, mut ball_settings) in &mut balls {
         for paddle_pos in &paddles {
             if ball_pos.translation.x - BALL_SIZE / 2.
-                < paddle_pos.translation.x - PADDLE_LENGTH / 2.
+                < paddle_pos.translation.x - PADDLE_WIDTH / 2.
                 && ball_pos.translation.x + BALL_SIZE / 2.
-                    > paddle_pos.translation.x + PADDLE_LENGTH / 2.
+                    > paddle_pos.translation.x + PADDLE_WIDTH / 2.
                 && ball_pos.translation.y - BALL_SIZE / 2.
-                    < paddle_pos.translation.y + PADDLE_WIDTH / 2.
+                    < paddle_pos.translation.y + PADDLE_HIGHT / 2.
                 && ball_pos.translation.y + BALL_SIZE / 2.
-                    > paddle_pos.translation.y - PADDLE_WIDTH / 2.
+                    > paddle_pos.translation.y - PADDLE_HIGHT / 2.
             {
                 ball_settings.0.x *= -1.;
                 ball_settings.0.y +=
-                    BALL_SPEED *0.7 * (ball_pos.translation.y - paddle_pos.translation.y) / (PADDLE_WIDTH / 2.);
+                    BALL_SPEED * 0.7 * (ball_pos.translation.y - paddle_pos.translation.y)
+                        / (PADDLE_HIGHT / 2.);
                 ball_settings.0.y = ball_settings.0.y.clamp(
-                    (360. - (BALL_DIRECTION_CONE / 2.)).to_radians().sin()*BALL_SPEED ,
-                    (BALL_DIRECTION_CONE / 2.).to_radians().sin()*BALL_SPEED ,
+                    (360. - (BALL_DIRECTION_CONE / 2.)).to_radians().sin() * BALL_SPEED,
+                    (BALL_DIRECTION_CONE / 2.).to_radians().sin() * BALL_SPEED,
                 );
             }
         }
-        if ball_pos.translation.y + BALL_SIZE / 2. > TABLE_WIDTH / 2.
-            || ball_pos.translation.y - BALL_SIZE / 2. < -TABLE_WIDTH / 2.
+        if ball_pos.translation.y + BALL_SIZE / 2. > WINDOW_HIGHT / 2.
+            || ball_pos.translation.y - BALL_SIZE / 2. < -WINDOW_HIGHT / 2.
         {
             ball_settings.0.y *= -1.;
         }
