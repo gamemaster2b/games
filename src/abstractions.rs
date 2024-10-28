@@ -1,5 +1,6 @@
 use rand::random;
 
+/// generates a random direction as an angle in radians
 pub fn get_random_direction(cone: f32) -> f32 {
     let mut direction: f32 = random::<f32>() * 360.;
     'set_cone: loop {

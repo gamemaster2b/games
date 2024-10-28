@@ -1,3 +1,8 @@
+//! # GAMES
+//! Games is a small project of mini-games I do wenever learning a new language.  
+//! This is for Rust using the Bevy Engine  
+//! [![Bevy Logo](https://bevyengine.org/assets/bevy_logo_docs.svg)](https://bevyengine.org)
+
 #![allow(unused)]
 
 pub mod abstractions;
