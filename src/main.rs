@@ -12,7 +12,7 @@ fn main() {
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "ZeroToPong".to_string(),
-            mode: WindowMode::BorderlessFullscreen,
+            mode: WindowMode::Windowed,
             ..Default::default()
         }),
         ..Default::default()
@@ -50,6 +50,7 @@ const PADDLE_VELOCITY: f32 = 200.;
 
 const TABLE_LENGTH: f32 = 700.;
 const TABLE_WIDTH: f32 = 500.;
+
 fn spawn_players(mut commands: Commands) {
     commands.spawn(SpriteBundle {
         transform: Transform::from_translation(Vec3::new(0.0, 0.0, -1.0)),
@@ -130,13 +131,18 @@ struct Ball(Vec2);
 
 const BALL_SIZE: f32 = PADDLE_WIDTH * 3. / 12.;
 const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
+const BALL_DIRECTION_CONE: f32 = 60.;
 
 fn spawn_ball(mut commands: Commands) {
     let mut direction: f32 = random::<f32>() * 360.;
     'set_cone: loop {
-        if direction > 30. && direction < 90. || direction > 210. && direction < 270. {
+        if direction > (BALL_DIRECTION_CONE / 2.) && direction < 90.
+            || direction > 180. + (BALL_DIRECTION_CONE / 2.) && direction < 270.
+        {
             direction -= 45.;
-        } else if direction > 270. && direction < 330. || direction > 90. && direction < 150. {
+        } else if direction > 270. && direction < 360. - (BALL_DIRECTION_CONE / 2.)
+            || direction > 90. && direction < 180. - (BALL_DIRECTION_CONE / 2.)
+        {
             direction += 45.;
         } else {
             direction = direction.to_radians();
@@ -168,7 +174,7 @@ fn move_ball(mut balls: Query<(&mut Transform, &Ball)>, time: Res<Time>) {
 }
 fn ball_collide(
     mut balls: Query<(&mut Transform, &mut Ball)>,
-    paddles: Query<&Transform, (With<Paddle>, Without<Ball>)>,
+    paddles: Query<&Transform, (With<Paddle>, Without<Ball>)>
 ) {
     for (ball_pos, mut ball_settings) in &mut balls {
         for paddle_pos in &paddles {
@@ -182,6 +188,12 @@ fn ball_collide(
                     > paddle_pos.translation.y - PADDLE_WIDTH / 2.
             {
                 ball_settings.0.x *= -1.;
+                ball_settings.0.y +=
+                    BALL_SPEED *0.7 * (ball_pos.translation.y - paddle_pos.translation.y) / (PADDLE_WIDTH / 2.);
+                ball_settings.0.y = ball_settings.0.y.clamp(
+                    (360. - (BALL_DIRECTION_CONE / 2.)).to_radians().sin()*BALL_SPEED ,
+                    (BALL_DIRECTION_CONE / 2.).to_radians().sin()*BALL_SPEED ,
+                );
             }
         }
         if ball_pos.translation.y + BALL_SIZE / 2. > TABLE_WIDTH / 2.
