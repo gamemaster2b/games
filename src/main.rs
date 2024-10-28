@@ -1,20 +1,29 @@
 #![allow(unused)]
 
+pub mod abstractions;
 pub mod colors;
 
+use abstractions::get_random_direction;
 use bevy::{
+    math::VectorSpace,
     prelude::*,
     window::{WindowMode, WindowResolution},
 };
-use rand::random;
+use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::{
+    dynamics::RigidBody,
+    plugin::{NoUserData, RapierPhysicsPlugin},
+    render::RapierDebugRenderPlugin,
+};
 use std::string::ToString;
 
-const WINDOW_WIDTH: f32 = 1280.;
-const WINDOW_HIGHT: f32 = 720.;
+const WINDOW_WIDTH: f32 = 1344.;
+const WINDOW_HIGHT: f32 = 756.;
 
 fn main() {
     let mut app = App::new();
     app.insert_resource(ClearColor(colors::CAMERA_CLEAR_COLOR));
+
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "ZeroToPong".to_string(),
@@ -24,6 +33,15 @@ fn main() {
         }),
         ..Default::default()
     }));
+
+    app.insert_resource(RapierConfiguration {
+        gravity: Vec2::ZERO,
+        ..RapierConfiguration::new(1.)
+    });
+    app.add_plugins(RapierPhysicsPlugin::<NoUserData>::default());
+    #[cfg(debug_assertions)]
+    app.add_plugins(RapierDebugRenderPlugin::default());
+
     app.add_systems(Startup, (spawn_camera, spawn_players, spawn_ball));
     app.add_systems(Update, (move_paddles, (ball_collide, move_ball).chain()));
 
@@ -75,6 +93,8 @@ fn spawn_players(mut commands: Commands) {
             move_down: KeyCode::KeyS,
             ..Default::default()
         },
+        RigidBody::KinematicPositionBased,
+        Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HIGHT / 2.),
     ));
     commands.spawn((
         SpriteBundle {
@@ -96,6 +116,8 @@ fn spawn_players(mut commands: Commands) {
             move_down: KeyCode::ArrowDown,
             ..Default::default()
         },
+        RigidBody::KinematicPositionBased,
+        Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HIGHT / 2.),
     ));
 }
 fn move_paddles(
@@ -129,21 +151,7 @@ const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
 const BALL_DIRECTION_CONE: f32 = 60.;
 
 fn spawn_ball(mut commands: Commands) {
-    let mut direction: f32 = random::<f32>() * 360.;
-    'set_cone: loop {
-        if direction > (BALL_DIRECTION_CONE / 2.) && direction < 90.
-            || direction > 180. + (BALL_DIRECTION_CONE / 2.) && direction < 270.
-        {
-            direction -= 45.;
-        } else if direction > 270. && direction < 360. - (BALL_DIRECTION_CONE / 2.)
-            || direction > 90. && direction < 180. - (BALL_DIRECTION_CONE / 2.)
-        {
-            direction += 45.;
-        } else {
-            direction = direction.to_radians();
-            break 'set_cone;
-        }
-    }
+    let direction: f32 = get_random_direction(BALL_DIRECTION_CONE);
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3::new(0., 0., 0.)),
@@ -158,6 +166,8 @@ fn spawn_ball(mut commands: Commands) {
             BALL_SPEED * direction.cos(),
             BALL_SPEED * direction.sin(),
         )),
+        RigidBody::Dynamic,
+        Collider::ball(BALL_SIZE),
     ));
 }
 
@@ -170,8 +180,9 @@ fn move_ball(mut balls: Query<(&mut Transform, &Ball)>, time: Res<Time>) {
 fn ball_collide(
     mut balls: Query<(&mut Transform, &mut Ball)>,
     paddles: Query<&Transform, (With<Paddle>, Without<Ball>)>,
+    time: Res<Time>,
 ) {
-    for (ball_pos, mut ball_settings) in &mut balls {
+    for (mut ball_pos, mut ball_settings) in &mut balls {
         for paddle_pos in &paddles {
             if ball_pos.translation.x - BALL_SIZE / 2.
                 < paddle_pos.translation.x - PADDLE_WIDTH / 2.
@@ -183,6 +194,7 @@ fn ball_collide(
                     > paddle_pos.translation.y - PADDLE_HIGHT / 2.
             {
                 ball_settings.0.x *= -1.;
+                ball_pos.translation.x += ball_settings.0.x * time.delta_seconds();
                 ball_settings.0.y +=
                     BALL_SPEED * 0.7 * (ball_pos.translation.y - paddle_pos.translation.y)
                         / (PADDLE_HIGHT / 2.);
@@ -196,6 +208,7 @@ fn ball_collide(
             || ball_pos.translation.y - BALL_SIZE / 2. < -WINDOW_HIGHT / 2.
         {
             ball_settings.0.y *= -1.;
+            ball_pos.translation.y += ball_settings.0.y * time.delta_seconds();
         }
     }
 }
