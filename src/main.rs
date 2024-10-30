@@ -10,7 +10,6 @@ pub mod colors;
 
 use abstractions::get_random_direction;
 use bevy::{
-    math::VectorSpace,
     prelude::*,
     window::{WindowMode, WindowResolution},
 };
@@ -22,8 +21,8 @@ use bevy_rapier2d::{
 };
 use std::string::ToString;
 
-const WINDOW_WIDTH: f32 = 1344.;
-const WINDOW_HIGHT: f32 = 756.;
+const WINDOW_WIDTH: f32 = 1280.;
+const WINDOW_HIGHT: f32 = 720.;
 
 fn main() {
     let mut app = App::new();
@@ -47,7 +46,10 @@ fn main() {
     #[cfg(debug_assertions)]
     app.add_plugins(RapierDebugRenderPlugin::default());
 
-    app.add_systems(Startup, (spawn_camera, spawn_players, spawn_ball));
+    app.add_systems(
+        Startup,
+        (spawn_camera, spawn_players, spawn_border, spawn_ball),
+    );
     app.add_systems(Update, (move_paddles));
 
     app.run();
@@ -55,6 +57,63 @@ fn main() {
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
+}
+
+/// Spawns The Bounds of the game
+pub fn spawn_border(mut commands: Commands) {
+    /// Spawns the top bound which the ball bounces of
+    commands.spawn((
+        SpatialBundle {
+            transform: Transform::from_translation(Vec3::new(0., WINDOW_HIGHT / 2., 0.)),
+            ..Default::default()
+        },
+        Collider::cuboid(WINDOW_WIDTH / 2., 1.),
+        Friction {
+            coefficient: 0.,
+            combine_rule: CoefficientCombineRule::Min,
+        },
+    ));
+
+    /// Spawns the bottom bound which the ball bounces of
+    commands.spawn((
+        SpatialBundle {
+            transform: Transform::from_translation(Vec3::new(0., -WINDOW_HIGHT / 2., 0.)),
+            ..Default::default()
+        },
+        Collider::cuboid(WINDOW_WIDTH / 2., 1.),
+        Friction {
+            coefficient: 0.,
+            combine_rule: CoefficientCombineRule::Min,
+        },
+    ));
+
+    /// Spawns the goal that the player on the right is defending
+    commands.spawn((
+        SpatialBundle {
+            transform: Transform::from_translation(Vec3::new(WINDOW_WIDTH / 2., 0., 0.)),
+            ..Default::default()
+        },
+        Collider::cuboid(1., WINDOW_HIGHT / 2.),
+        Player::PlayerLeft,
+        Sensor,
+    ));
+
+    /// Spawns the goal that the player on the left is defending
+    commands.spawn((
+        SpatialBundle {
+            transform: Transform::from_translation(Vec3::new(-WINDOW_WIDTH / 2., 0., 0.)),
+            ..Default::default()
+        },
+        Collider::cuboid(1., WINDOW_HIGHT / 2.),
+        Player::PlayerRight,
+        Sensor,
+    ));
+}
+
+#[derive(Component)]
+enum Player {
+    PlayerLeft,
+    PlayerRight,
 }
 
 #[derive(Component)]
@@ -149,34 +208,34 @@ fn move_paddles(
 }
 
 #[derive(Component)]
-struct Ball(Vec2);
+struct Ball;
 
-const BALL_SIZE: f32 = PADDLE_HIGHT * 3. / 12.;
+const BALL_SIZE: f32 = PADDLE_HIGHT * 6. / 12.;
 const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
-const BALL_DIRECTION_CONE: f32 = 100.;
+const BALL_DIRECTION_CONE: f32 = 30.;
 
-fn spawn_ball(mut commands: Commands) {
+fn spawn_ball(mut commands: Commands, asset_server: Res<AssetServer>) {
     let direction: f32 = get_random_direction(BALL_DIRECTION_CONE);
     commands.spawn((
         SpriteBundle {
+            texture: asset_server.load("bevy.png"),
             transform: Transform::from_translation(Vec3::new(0., 0., 0.)),
             sprite: Sprite {
-                color: colors::TILE,
                 custom_size: Some(Vec2::new(BALL_SIZE, BALL_SIZE)),
                 ..Default::default()
             },
             ..Default::default()
         },
-        Ball(Vec2::new(
+        Ball,
+        RigidBody::Dynamic,
+        Collider::ball(BALL_SIZE / 2.),
+        Velocity::linear(Vec2::new(
             BALL_SPEED * direction.cos(),
             BALL_SPEED * direction.sin(),
         )),
-        RigidBody::Dynamic,
-        Collider::ball(BALL_SIZE),
-        Velocity::linear(Vec2::new(
-            BALL_SPEED * direction.cos(),
-            BALL_SPEED * direction.sin(),))
+        Restitution {
+            coefficient: 1.1,
+            combine_rule: CoefficientCombineRule::Max,
+        },
     ));
 }
-
-
