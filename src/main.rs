@@ -4,21 +4,22 @@
 //! [![Bevy Logo](https://bevyengine.org/assets/bevy_logo_docs.svg)](https://bevyengine.org)
 
 #![allow(unused)]
+#![allow(clippy::single_match)]
 
-pub mod abstractions;
 pub mod colors;
 
-use abstractions::get_random_direction;
 use bevy::{
     prelude::*,
     window::{WindowMode, WindowResolution},
 };
-use bevy_rapier2d::prelude::*;
 use bevy_rapier2d::{
     dynamics::RigidBody,
     plugin::{NoUserData, RapierPhysicsPlugin},
+    prelude::*,
     render::RapierDebugRenderPlugin,
 };
+use games::*;
+use rand::random;
 use std::string::ToString;
 
 const WINDOW_WIDTH: f32 = 1280.;
@@ -50,7 +51,10 @@ fn main() {
         Startup,
         (spawn_camera, spawn_players, spawn_border, spawn_ball),
     );
-    app.add_systems(Update, (move_paddles));
+    app.add_systems(Update, (move_paddles, detect_reset));
+    app.add_systems(PostUpdate, reset_ball);
+
+    app.add_event::<GameEvents>();
 
     app.run();
 }
@@ -110,13 +114,38 @@ pub fn spawn_border(mut commands: Commands) {
     ));
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 enum Player {
     PlayerLeft,
     PlayerRight,
 }
 
-#[derive(Component)]
+impl Player {
+    fn start_speed(&self) -> Velocity {
+        let direction = get_random_direction(BALL_DIRECTION_CONE);
+        match self {
+            Player::PlayerLeft => Velocity::linear(Vec2::new(
+                BALL_SPEED * direction.cos().abs(),
+                BALL_SPEED * direction.sin(),
+            )),
+            Player::PlayerRight => Velocity::linear(Vec2::new(
+                BALL_SPEED * direction.cos().abs() * -1.,
+                BALL_SPEED * direction.sin(),
+            )),
+        }
+    }
+}
+
+impl Clone for Player {
+    fn clone(&self) -> Player {
+        match self {
+            Player::PlayerLeft => Player::PlayerLeft,
+            Player::PlayerRight => Player::PlayerRight,
+        }
+    }
+}
+
+#[derive(Component, Debug)]
 struct Paddle {
     move_up: KeyCode,
     move_down: KeyCode,
@@ -207,7 +236,7 @@ fn move_paddles(
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 struct Ball;
 
 const BALL_SIZE: f32 = PADDLE_HIGHT * 6. / 12.;
@@ -228,7 +257,9 @@ fn spawn_ball(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Ball,
         RigidBody::Dynamic,
+        ActiveEvents::COLLISION_EVENTS,
         Collider::ball(BALL_SIZE / 2.),
+        CollidingEntities::default(),
         Velocity::linear(Vec2::new(
             BALL_SPEED * direction.cos(),
             BALL_SPEED * direction.sin(),
@@ -238,4 +269,51 @@ fn spawn_ball(mut commands: Commands, asset_server: Res<AssetServer>) {
             combine_rule: CoefficientCombineRule::Max,
         },
     ));
+}
+
+#[derive(Event, Debug)]
+enum GameEvents {
+    ResetBall(Player),
+}
+
+fn detect_reset(
+    input: Res<ButtonInput<KeyCode>>,
+    balls: Query<&CollidingEntities, With<Ball>>,
+    goals: Query<&Player, With<Sensor>>,
+    mut game_events: EventWriter<GameEvents>,
+) {
+    if input.just_pressed(KeyCode::Space) {
+        let player = if random::<bool>() {
+            Player::PlayerLeft
+        } else {
+            Player::PlayerRight
+        };
+        game_events.send(GameEvents::ResetBall(player));
+        return;
+    }
+    for ball in &balls {
+        for hit in ball.iter() {
+            if let Ok(player) = goals.get(hit) {
+                game_events.send(GameEvents::ResetBall(player.clone()));
+                return;
+            }
+        }
+    }
+}
+
+fn reset_ball(
+    mut balls: Query<(&mut Transform, &mut Velocity), With<Ball>>,
+    mut game_events: EventReader<GameEvents>,
+) {
+    for events in game_events.read() {
+        match events {
+            GameEvents::ResetBall(player) => {
+                for (mut ball, mut speed) in &mut balls {
+                    ball.translation = Vec3::ZERO;
+                    *speed = player.start_speed();
+                }
+            }
+            _ => {}
+        }
+    }
 }
