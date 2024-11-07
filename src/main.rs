@@ -1,7 +1,19 @@
-//! # GAMES
-//! Games is a small project of mini-games I do wenever learning a new language.  
-//! This is for Rust using the Bevy Engine  
-//! [![Bevy Logo](https://bevyengine.org/assets/bevy_logo_docs.svg)](https://bevyengine.org)
+//! # Games Collection
+//! A collection of mini-games implemented in Rust using the Bevy Engine.
+//! 
+//! This project serves as a learning exercise for Rust game development using the Bevy engine.
+//! Currently implements a Pong clone with physics-based ball movement and paddle controls.
+//! 
+//! ## Features
+//! - Physics-based ball movement using bevy_rapier2d
+//! - Two-player paddle controls
+//! - Score detection via goals
+//! - Configurable game parameters
+//! 
+//! ## Controls
+//! - Left paddle: W/S keys
+//! - Right paddle: Up/Down arrow keys
+//! - Reset ball: Spacebar
 
 #![allow(unused)]
 #![allow(clippy::single_match)]
@@ -18,12 +30,36 @@ use bevy_rapier2d::{
     prelude::*,
     render::RapierDebugRenderPlugin,
 };
-use games::*;
 use rand::random;
 use std::string::ToString;
 
 const WINDOW_WIDTH: f32 = 1280.;
 const WINDOW_HIGHT: f32 = 720.;
+
+/// Returns a random direction angle (in radians) within specified cone constraints.
+/// 
+/// The function ensures the ball moves in a playable direction by avoiding
+/// extreme vertical angles. The returned angle is constrained within acceptable
+/// ranges based on the provided cone angle.
+/// 
+/// # Arguments
+/// * `cone` - The angle of the cone (in degrees) within which the direction should fall
+/// 
+/// # Returns
+/// A random direction angle in radians
+pub fn get_random_direction(cone: f32) -> f32 {
+    let mut direction: f32 = rand::random::<f32>() * 360.;
+    loop {
+    match direction {
+        left if (cone / 2. .. 90.).contains(&left)
+            || (180. + cone / 2. .. 270.).contains(&left) => direction -= 45.,
+        right if (270. .. 360. - cone / 2.).contains(&right)
+                || (90. .. 180. - cone / 2.).contains(&right) => direction += 45.,
+            _ => {direction = direction.to_radians();return direction},
+        }
+    }
+}
+
 
 fn main() {
     let mut app = App::new();
@@ -59,11 +95,16 @@ fn main() {
     app.run();
 }
 
+/// Spawns the camera for 2D rendering.
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-/// Spawns The Bounds of the game
+/// Spawns the game boundaries and goals.
+/// 
+/// Creates:
+/// - Top and bottom walls that the ball bounces off
+/// - Left and right goals that trigger scoring events
 pub fn spawn_border(mut commands: Commands) {
     /// Spawns the top bound which the ball bounces of
     commands.spawn((
@@ -114,9 +155,13 @@ pub fn spawn_border(mut commands: Commands) {
     ));
 }
 
+/// Represents a player in the game.
+/// Used to identify paddle positions and scoring events.
 #[derive(Component, Debug)]
 enum Player {
+    /// Left side player
     PlayerLeft,
+    /// Right side player
     PlayerRight,
 }
 
@@ -145,10 +190,14 @@ impl Clone for Player {
     }
 }
 
+/// Configuration for a paddle, including movement controls and velocity.
 #[derive(Component, Debug)]
 struct Paddle {
+    /// Key for upward movement
     move_up: KeyCode,
+    /// Key for downward movement
     move_down: KeyCode,
+    /// Movement speed in units per second
     velocity: f32,
 }
 
@@ -166,6 +215,11 @@ const PADDLE_WIDTH: f32 = 10.;
 const PADDLE_HIGHT: f32 = WINDOW_HIGHT / 5.;
 const PADDLE_VELOCITY: f32 = 200.;
 
+/// Spawns both player paddles with their initial positions and properties.
+/// 
+/// Creates two paddles:
+/// - Left paddle controlled by W/S keys
+/// - Right paddle controlled by Up/Down arrow keys
 fn spawn_players(mut commands: Commands) {
     commands.spawn((
         SpriteBundle {
@@ -213,6 +267,11 @@ fn spawn_players(mut commands: Commands) {
         Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HIGHT / 2.),
     ));
 }
+
+/// System that handles paddle movement based on player input.
+/// 
+/// Updates paddle positions while ensuring they stay within the game boundaries.
+/// Movement is time-delta based for smooth motion.
 fn move_paddles(
     mut paddles: Query<(&mut Transform, &Paddle), With<Paddle>>,
     input: Res<ButtonInput<KeyCode>>,
@@ -236,6 +295,7 @@ fn move_paddles(
     }
 }
 
+/// Marker component for the game ball
 #[derive(Component, Debug)]
 struct Ball;
 
@@ -243,6 +303,12 @@ const BALL_SIZE: f32 = PADDLE_HIGHT * 6. / 12.;
 const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
 const BALL_DIRECTION_CONE: f32 = 30.;
 
+/// Spawns the game ball with initial physics properties.
+/// 
+/// Creates a ball entity with:
+/// - Sprite rendering
+/// - Physics body and collider
+/// - Initial velocity in a random direction
 fn spawn_ball(mut commands: Commands, asset_server: Res<AssetServer>) {
     let direction: f32 = get_random_direction(BALL_DIRECTION_CONE);
     commands.spawn((
@@ -271,11 +337,21 @@ fn spawn_ball(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
+/// Game events that can occur during gameplay.
 #[derive(Event, Debug)]
 enum GameEvents {
+    /// Event triggered when the ball needs to be reset
+    /// 
+    /// # Arguments
+    /// * `Player` - The player towards whom the ball should be launched
     ResetBall(Player),
 }
 
+/// System that detects when the ball needs to be reset.
+/// 
+/// Triggers a reset when:
+/// - The spacebar is pressed (manual reset)
+/// - The ball enters a goal (automatic reset)
 fn detect_reset(
     input: Res<ButtonInput<KeyCode>>,
     balls: Query<&CollidingEntities, With<Ball>>,
@@ -301,6 +377,11 @@ fn detect_reset(
     }
 }
 
+/// System that handles resetting the ball's position and velocity.
+/// 
+/// Responds to ResetBall events by:
+/// - Moving the ball back to center
+/// - Setting a new velocity based on which player scored
 fn reset_ball(
     mut balls: Query<(&mut Transform, &mut Velocity), With<Ball>>,
     mut game_events: EventReader<GameEvents>,
