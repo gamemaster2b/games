@@ -7,13 +7,9 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'games'",
+            "name": "tests 'games'",
             "cargo": {
-                "args": [
-                    "build",
-                    "--bin=games",
-                    "--package=games"
-                ],
+                "args": ["test", "--no-run", "--bin=games", "--package=games"],
                 "filter": {
                     "name": "games",
                     "kind": "bin"
@@ -24,20 +20,27 @@
         },
         {
             "type": "lldb",
+            "request": "attach",
+            "name": "Attach to 'games'",
+            "program": "${workspaceFolder}/target/debug/games",
+            "pid": "${command:pickProcess}",
+            "waitFor": true
+        },
+        {
+            "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'games'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=games",
-                    "--package=games"
-                ],
-                "filter": {
-                    "name": "games",
-                    "kind": "bin"
-                }
-            },
+            "name": "Debug 'games'",
+            "preLaunchTask": "cargo build",
+            "program": "${workspaceFolder}/target/debug/games",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug release 'games'",
+            "preLaunchTask": "cargo build release",
+            "program": "${workspaceFolder}/target/release/games",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
