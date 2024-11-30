@@ -2,7 +2,7 @@
 //! A collection of mini-games implemented in Rust using the Bevy Engine.
 //!
 //! This project serves as a learning exercise for Rust game development using the Bevy engine.
-//! Currently implements a Pong clone with physics-based ball movement and paddle controls.
+//! Currently, it implements a Pong clone with physics-based ball movement and paddle controls.
 //!
 //! ## Features
 //! - Physics-based ball movement using bevy_rapier2d
@@ -36,7 +36,7 @@ use rand::random;
 use std::string::ToString;
 
 const WINDOW_WIDTH: f32 = 1280.;
-const WINDOW_HIGHT: f32 = 720.;
+const WINDOW_HEIGHT: f32 = 720.;
 
 /// Returns a random direction angle (in radians) within specified cone constraints.
 ///
@@ -80,7 +80,7 @@ fn main() {
         primary_window: Some(Window {
             title: "ZeroToPong".to_string(),
             mode: WindowMode::Windowed,
-            resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HIGHT),
+            resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HEIGHT),
             ..Default::default()
         }),
         ..Default::default()
@@ -129,7 +129,7 @@ pub fn spawn_border(mut commands: Commands) {
     /// Spawns the top bound which the ball bounces of
     commands.spawn((
         SpatialBundle {
-            transform: Transform::from_translation(Vec3::new(0., WINDOW_HIGHT / 2., 0.)),
+            transform: Transform::from_translation(Vec3::new(0., WINDOW_HEIGHT / 2., 0.)),
             ..Default::default()
         },
         Collider::cuboid(WINDOW_WIDTH / 2., 1.),
@@ -143,7 +143,7 @@ pub fn spawn_border(mut commands: Commands) {
     /// Spawns the bottom bound which the ball bounces of
     commands.spawn((
         SpatialBundle {
-            transform: Transform::from_translation(Vec3::new(0., -WINDOW_HIGHT / 2., 0.)),
+            transform: Transform::from_translation(Vec3::new(0., -WINDOW_HEIGHT / 2., 0.)),
             ..Default::default()
         },
         Collider::cuboid(WINDOW_WIDTH / 2., 1.),
@@ -160,7 +160,7 @@ pub fn spawn_border(mut commands: Commands) {
             transform: Transform::from_translation(Vec3::new(WINDOW_WIDTH / 2., 0., 0.)),
             ..Default::default()
         },
-        Collider::cuboid(1., WINDOW_HIGHT / 2.),
+        Collider::cuboid(1., WINDOW_HEIGHT / 2.),
         Player::PlayerLeft,
         Sensor,
     ));
@@ -172,7 +172,7 @@ pub fn spawn_border(mut commands: Commands) {
             transform: Transform::from_translation(Vec3::new(-WINDOW_WIDTH / 2., 0., 0.)),
             ..Default::default()
         },
-        Collider::cuboid(1., WINDOW_HIGHT / 2.),
+        Collider::cuboid(1., WINDOW_HEIGHT / 2.),
         Player::PlayerRight,
         Sensor,
     ));
@@ -236,7 +236,7 @@ impl Default for Paddle {
 }
 
 const PADDLE_WIDTH: f32 = 10.;
-const PADDLE_HIGHT: f32 = WINDOW_HIGHT / 5.;
+const PADDLE_HEIGHT: f32 = WINDOW_HEIGHT / 5.;
 const PADDLE_VELOCITY: f32 = 200.;
 
 /// Spawns both player paddles with their initial positions and properties.
@@ -256,7 +256,7 @@ fn spawn_players(mut commands: Commands) {
             )),
             sprite: Sprite {
                 color: colors::TILE_PLACEHOLDER,
-                custom_size: Some(Vec2::new(PADDLE_WIDTH, PADDLE_HIGHT)),
+                custom_size: Some(Vec2::new(PADDLE_WIDTH, PADDLE_HEIGHT)),
                 ..Default::default()
             },
             ..Default::default()
@@ -267,7 +267,7 @@ fn spawn_players(mut commands: Commands) {
             ..Default::default()
         },
         RigidBody::KinematicPositionBased,
-        Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HIGHT / 2.),
+        Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HEIGHT / 2.),
     ));
     info!("Spawned left paddle");
 
@@ -280,7 +280,7 @@ fn spawn_players(mut commands: Commands) {
             )),
             sprite: Sprite {
                 color: colors::TILE_PLACEHOLDER,
-                custom_size: Some(Vec2::new(PADDLE_WIDTH, PADDLE_HIGHT)),
+                custom_size: Some(Vec2::new(PADDLE_WIDTH, PADDLE_HEIGHT)),
                 ..Default::default()
             },
 
@@ -292,7 +292,7 @@ fn spawn_players(mut commands: Commands) {
             ..Default::default()
         },
         RigidBody::KinematicPositionBased,
-        Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HIGHT / 2.),
+        Collider::cuboid(PADDLE_WIDTH / 2., PADDLE_HEIGHT / 2.),
     ));
     info!("Spawned right paddle");
 }
@@ -312,15 +312,15 @@ fn move_paddles(
         if input.pressed(settings.move_up) {
             pos.translation.y += settings.velocity * time.delta_seconds();
             pos.translation.y = pos.translation.y.clamp(
-                -WINDOW_HIGHT / 2. + (PADDLE_HIGHT / 2.),
-                (WINDOW_HIGHT / 2.) - (PADDLE_HIGHT / 2.),
+                -WINDOW_HEIGHT / 2. + (PADDLE_HEIGHT / 2.),
+                (WINDOW_HEIGHT / 2.) - (PADDLE_HEIGHT / 2.),
             );
         }
         if input.pressed(settings.move_down) {
             pos.translation.y += -settings.velocity * time.delta_seconds();
             pos.translation.y = pos.translation.y.clamp(
-                -WINDOW_HIGHT / 2. + (PADDLE_HIGHT / 2.),
-                (WINDOW_HIGHT / 2.) - (PADDLE_HIGHT / 2.),
+                -WINDOW_HEIGHT / 2. + (PADDLE_HEIGHT / 2.),
+                (WINDOW_HEIGHT / 2.) - (PADDLE_HEIGHT / 2.),
             );
         }
 
@@ -334,7 +334,7 @@ fn move_paddles(
 #[derive(Component, Debug)]
 struct Ball;
 
-const BALL_SIZE: f32 = PADDLE_HIGHT * 6. / 12.;
+const BALL_SIZE: f32 = PADDLE_HEIGHT * 6. / 12.;
 const BALL_SPEED: f32 = PADDLE_VELOCITY * 1.0;
 const BALL_DIRECTION_CONE: f32 = 30.;
 
